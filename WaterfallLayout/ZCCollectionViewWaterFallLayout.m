@@ -237,7 +237,7 @@ static CGFloat ZCFloorCGFloat(CGFloat value){
 
 #pragma mark - Methods to Override
 -(void)prepareLayout{
-    [self prepareLayout];
+    [super prepareLayout];
     
     [self.headersAttribute removeAllObjects];
     [self.footersAttribute removeAllObjects];
@@ -261,7 +261,7 @@ static CGFloat ZCFloorCGFloat(CGFloat value){
     
     for(NSInteger section = 0;section < numberOfSections;section++){
     
-        NSInteger columCount = [self.collectionView numberOfItemsInSection:section];
+        NSInteger columCount = [self columnCountForSection:section];
         
   //arrayWithCapacity 初始化可变数组的长度
         NSMutableArray * sectionColumnHeights = [NSMutableArray arrayWithCapacity:columCount];
@@ -343,7 +343,7 @@ static CGFloat ZCFloorCGFloat(CGFloat value){
         }
         
         
-        top += sectionInset.top;
+        top += (sectionInset.top + headerHeight + headerInset.top + headerInset.bottom);
         
         for(idx = 0; idx<columnCount; idx++){
         
@@ -416,7 +416,7 @@ static CGFloat ZCFloorCGFloat(CGFloat value){
             attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:ZCCollectionElementKindSectionFooter withIndexPath:[NSIndexPath indexPathForItem:0 inSection:section]];
             attributes.frame = CGRectMake(footerInset.left,
                                           top,
-                                          self.collectionView.bounds.size.width - (footerInset.left + footerInset.right),
+                                        self.collectionView.bounds.size.width - (footerInset.left + footerInset.right),
                                           footerHeight);
             
             self.footersAttribute[@(section)] = attributes;
@@ -465,6 +465,63 @@ static CGFloat ZCFloorCGFloat(CGFloat value){
     
     return contentSize;
 }
+
+- (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)path {
+    if (path.section >= [self.sectionItemAttributes count]) {
+        return nil;
+    }
+    if (path.item >= [self.sectionItemAttributes[path.section] count]) {
+        return nil;
+    }
+    return (self.sectionItemAttributes[path.section])[path.item];
+}
+
+- (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewLayoutAttributes *attribute = nil;
+    if ([kind isEqualToString:ZCCollectionElementKindSectionHeader]) {
+        attribute = self.headersAttribute[@(indexPath.section)];
+    } else if ([kind isEqualToString:ZCCollectionElementKindSectionFooter]) {
+        attribute = self.footersAttribute[@(indexPath.section)];
+    }
+    return attribute;
+}
+
+- (NSArray *)layoutAttributesForElementsInRect:(CGRect)rect {
+    NSInteger i;
+    NSInteger begin = 0, end = self.unionRects.count;
+    NSMutableArray *attrs = [NSMutableArray array];
+    
+    for (i = 0; i < self.unionRects.count; i++) {
+        if (CGRectIntersectsRect(rect, [self.unionRects[i] CGRectValue])) {
+            begin = i * unionSize;
+            break;
+        }
+    }
+    for (i = self.unionRects.count - 1; i >= 0; i--) {
+        if (CGRectIntersectsRect(rect, [self.unionRects[i] CGRectValue])) {
+            end = MIN((i + 1) * unionSize, self.allItemAttributes.count);
+            break;
+        }
+    }
+    for (i = begin; i < end; i++) {
+        UICollectionViewLayoutAttributes *attr = self.allItemAttributes[i];
+        if (CGRectIntersectsRect(rect, attr.frame)) {
+            [attrs addObject:attr];
+        }
+    }
+    
+    return [NSArray arrayWithArray:attrs];
+}
+
+- (BOOL)shouldInvalidateLayoutForBoundsChange:(CGRect)newBounds {
+    CGRect oldBounds = self.collectionView.bounds;
+    if (CGRectGetWidth(newBounds) != CGRectGetWidth(oldBounds)) {
+        return YES;
+    }
+    return NO;
+}
+
+
 
 #pragma mark -- private methods
 

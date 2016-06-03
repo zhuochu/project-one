@@ -9,8 +9,8 @@
 #import <UIKit/UIKit.h>
 
 
-extern NSString *const UICollectionElementKindSectionHeader;
-extern NSString *const UICollectionElementKindSectionFooter;
+extern NSString *const ZCCollectionElementKindSectionHeader;
+extern NSString *const ZCCollectionElementKindSectionFooter;
 
 typedef NS_ENUM(NSInteger, ZCCollectionViewWaterfallLayoutItemRenderDirection) {
     ZCCollectionViewWaterfallLayoutItemRenderDirectionShortestFirst,
@@ -42,7 +42,7 @@ typedef NS_ENUM(NSInteger, ZCCollectionViewWaterfallLayoutItemRenderDirection) {
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout heightForFooterInSection:(NSInteger)section;
 
 
-- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section;
+//- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section;
 
 - (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForHeaderInSection:(NSInteger)section;
 
